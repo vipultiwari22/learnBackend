@@ -1,0 +1,21 @@
+.Grid {
+  height: 500px;
+  width: 400px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+.turn-hightlight {
+  color: white;
+  font-size: larger;
+}
+.rest {
+  background-color: white;
+  color: black;
+  height: 30px;
+  width: 100px;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+}
