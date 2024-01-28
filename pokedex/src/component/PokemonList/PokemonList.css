@@ -30,9 +30,9 @@ hr {
 .Controls button {
   width: 80px;
   height: 20px;
-  border-radius: 10px;
+  /* border-radius: 10px;
   border: none;
   background: blue;
-  color: white;
+  color: white; */
   margin-left: 1rem;
 }

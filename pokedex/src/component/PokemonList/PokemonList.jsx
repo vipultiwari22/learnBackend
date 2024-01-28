@@ -91,29 +91,42 @@ import "./PokemonList.css";
 import Pokemon from "../Pokemon/Pokemon";
 
 function PokemonList() {
-  const [pokemonlist, setpokemonlist] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Now we are clear the concept of useState wehn multiple useState using in one variable
 
-  const [pokedexUrl, setPokedexUrl] = useState(
-    "https://pokeapi.co/api/v2/pokemon"
-  );
-  const [nextUrl, setNextUrl] = useState("");
-  const [prevUrl, setPrevUrl] = useState("");
+  // const [pokemonlist, setpokemonlist] = useState([]);
+  // const [isLoading, setIsLoading] = useState(true);
 
-  const downloadPokemon = async (url) => {
-    setIsLoading(true);
+  // const [pokedexUrl, setPokedexUrl] = useState(
+  //   "https://pokeapi.co/api/v2/pokemon"
+  // );
+  // const [nextUrl, setNextUrl] = useState("");
+  // const [prevUrl, setPrevUrl] = useState("");
+
+  const [pokemonListState, setPokemonListState] = useState({
+    PokemonLists: [],
+    isLoding: true,
+    pokedexUrl: `https://pokeapi.co/api/v2/pokemon`,
+    nextUrl: "",
+    prevUrl: "",
+  });
+  const downloadPokemon = async () => {
+    setPokemonListState({ ...pokemonListState, isLoding: true });
     try {
-      const response = await axios.get(url);
+      const response = await axios.get(pokemonListState.pokedexUrl);
       const Pokemonresults = response.data.results;
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
+      console.log(Pokemonresults);
+      setPokemonListState((state) => ({
+        ...state,
+        nextUrl: response.data.next,
+        prevUrl: response.data.previous,
+      }));
 
       const pokemonResultPromise = Pokemonresults.map((pokemon) =>
         axios.get(pokemon.url)
       );
       const pokemonData = await axios.all(pokemonResultPromise);
 
-      const res = pokemonData.map((pokeData) => ({
+      const pokeListResult = pokemonData.map((pokeData) => ({
         id: pokeData.data.id,
         name: pokeData.data.name,
         image: pokeData.data.sprites.other
@@ -122,17 +135,20 @@ function PokemonList() {
         types: pokeData.data.types,
       }));
 
-      setpokemonlist(res);
-      setIsLoading(false);
+      setPokemonListState((state) => ({
+        ...state,
+        PokemonLists: pokeListResult,
+        isLoding: false,
+      }));
     } catch (error) {
       console.error("Error fetching Pokemon data:", error);
-      setIsLoading(false);
+      setPokemonListState({ ...pokemonListState, isLoding: false });
     }
   };
 
   useEffect(() => {
-    downloadPokemon(pokedexUrl);
-  }, [pokedexUrl]);
+    downloadPokemon();
+  }, [pokemonListState.pokedexUrl]);
 
   return (
     <>
@@ -140,17 +156,33 @@ function PokemonList() {
         <div className="pokemon-list-name"> Pokemon List</div>
         <hr />
         <div className="pokemon-wapper">
-          {isLoading
+          {pokemonListState.isLoding
             ? "Loading....."
-            : pokemonlist.map((p) => (
-                <Pokemon name={p.name} image={p.image} key={p.id} id={p.id} />
+            : pokemonListState.PokemonLists.map((p, index) => (
+                <Pokemon name={p.name} image={p.image} key={index} id={p.id} />
               ))}
         </div>
         <div className="Controls">
-          <button disabled={!prevUrl} onClick={() => setPokedexUrl(prevUrl)}>
+          <button
+            disabled={pokemonListState.prevUrl == null}
+            onClick={() => {
+              setPokemonListState({
+                ...pokemonListState,
+                pokedexUrl: pokemonListState.prevUrl,
+              });
+            }}
+          >
             Prev
           </button>
-          <button disabled={!nextUrl} onClick={() => setPokedexUrl(nextUrl)}>
+          <button
+            disabled={pokemonListState.nextUrl == null}
+            onClick={() => {
+              setPokemonListState({
+                ...pokemonListState,
+                pokedexUrl: pokemonListState.nextUrl,
+              });
+            }}
+          >
             Next
           </button>
         </div>
