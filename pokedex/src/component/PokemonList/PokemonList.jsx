@@ -1,8 +1,7 @@
-// import { React, useEffect, useState } from "react";
-// import axios from "axios";
-// import "./PokemonList.css";
-// import Pokemon from "../Pokemon/Pokemon";
-
+import React, { useEffect, useState } from "react";
+import "./PokemonList.css";
+import Pokemon from "../Pokemon/Pokemon";
+import usepokemonList from "../Hooks/usePokemonList";
 // function PokemonList() {
 //   const [pokemonlist, setpokemonlist] = useState([]);
 //   const [isLoding, setIsLoding] = useState(true);
@@ -85,12 +84,10 @@
 
 // export default PokemonList;
 
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./PokemonList.css";
-import Pokemon from "../Pokemon/Pokemon";
-
 function PokemonList() {
+  const [pokemonListState, setPokemonListState] = usepokemonList(
+    `https://pokeapi.co/api/v2/pokemon`,false
+  );
   // Now we are clear the concept of useState wehn multiple useState using in one variable
 
   // const [pokemonlist, setpokemonlist] = useState([]);
@@ -101,54 +98,6 @@ function PokemonList() {
   // );
   // const [nextUrl, setNextUrl] = useState("");
   // const [prevUrl, setPrevUrl] = useState("");
-
-  const [pokemonListState, setPokemonListState] = useState({
-    PokemonLists: [],
-    isLoding: true,
-    pokedexUrl: `https://pokeapi.co/api/v2/pokemon`,
-    nextUrl: "",
-    prevUrl: "",
-  });
-  const downloadPokemon = async () => {
-    setPokemonListState({ ...pokemonListState, isLoding: true });
-    try {
-      const response = await axios.get(pokemonListState.pokedexUrl);
-      const Pokemonresults = response.data.results;
-      console.log(Pokemonresults);
-      setPokemonListState((state) => ({
-        ...state,
-        nextUrl: response.data.next,
-        prevUrl: response.data.previous,
-      }));
-
-      const pokemonResultPromise = Pokemonresults.map((pokemon) =>
-        axios.get(pokemon.url)
-      );
-      const pokemonData = await axios.all(pokemonResultPromise);
-
-      const pokeListResult = pokemonData.map((pokeData) => ({
-        id: pokeData.data.id,
-        name: pokeData.data.name,
-        image: pokeData.data.sprites.other
-          ? pokeData.data.sprites.other.dream_world.front_default
-          : pokeData.data.sprites.front_shiny,
-        types: pokeData.data.types,
-      }));
-
-      setPokemonListState((state) => ({
-        ...state,
-        PokemonLists: pokeListResult,
-        isLoding: false,
-      }));
-    } catch (error) {
-      console.error("Error fetching Pokemon data:", error);
-      setPokemonListState({ ...pokemonListState, isLoding: false });
-    }
-  };
-
-  useEffect(() => {
-    downloadPokemon();
-  }, [pokemonListState.pokedexUrl]);
 
   return (
     <>
