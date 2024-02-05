@@ -2,8 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "./PokemonDetails.css";
-import PokemonList from "../PokemonList/PokemonList";
-import usepokemonList from "../Hooks/usePokemonList";
+// import PokemonList from "../PokemonList/PokemonList";
+import usePokemonList from "../Hooks/usePokemonList";
 
 function PokemonDetails() {
   const { id } = useParams();
@@ -14,7 +14,6 @@ function PokemonDetails() {
       const response = await axios.get(
         `https://pokeapi.co/api/v2/pokemon/${id}`
       );
-      // console.log(response.data.name);
       setPokemon({
         Name: response.data.name,
         image: response.data.sprites.other.dream_world.front_default,
@@ -27,7 +26,7 @@ function PokemonDetails() {
     }
   }
 
-  const [pokemonListState, setPokemonListState] = usepokemonList(
+  const [pokemonListState, setPokemonListState] = usePokemonList(
     `https://pokeapi.co/api/v2/type/fire/`,
     true
   );
@@ -52,7 +51,7 @@ function PokemonDetails() {
         More fire types Pokemons
         <ul>
           {pokemonListState.PokemonLists &&
-            PokemonLists.map((p) => (
+            pokemonListState.PokemonLists.map((p) => (
               <li key={p.pokemon.url}>{p.pokemon.name}</li>
             ))}
         </ul>
