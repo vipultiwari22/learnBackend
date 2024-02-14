@@ -1,7 +1,7 @@
 const { error } = require("console");
 const http = require("http");
 
-const PORT = 3000;
+const PORT = 4000;
 const HOSTNAME = "loaclhost";
 
 const server = http.createServer((req, res) => {
