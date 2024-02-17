@@ -1,8 +1,20 @@
-const express = require("express");
-const app = express();
+require("dotenv").config();
 
-app.use("/", (req, res) => {
-  res.status(200).json({ data: "Json server" });
-});
+const express = require("express");
+// const cors = require("cors");
+
+const connectToDb = require("./config/db");
+
+const app = express();
+// app.use(cors());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+connectToDb();
+
+const authRouter = require("./routes/authRoute");
+
+app.use("/", authRouter);
 
 module.exports = app;
