@@ -1,5 +1,6 @@
 const userModel = require("../model/userSchema");
 const emailValidator = require("email-validator");
+const bcrypt = require("bcrypt");
 
 exports.Home = async (req, res) => {
   try {
@@ -82,7 +83,7 @@ exports.singin = async (req, res) => {
       })
       .select("+password");
 
-    if (!user || user.password !== password) {
+    if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(400).json({
         success: false,
         message: "you give Wrong Credentials",
@@ -103,6 +104,41 @@ exports.singin = async (req, res) => {
     });
   } catch (error) {
     return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+exports.CookiegetUser = async (req, res) => {
+  const userId = req.user.id;
+  try {
+    const user = await userModel.findById(userId);
+    return res.status(200).json({
+      success: true,
+      data: user,
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      data: error.message,
+    });
+  }
+};
+
+exports.logout = (req, res) => {
+  try {
+    const CookieOption = {
+      expires: new Date(),
+      httpOnly: true,
+    };
+    res.cookie("token", null, CookieOption);
+    res.status(200).json({
+      success: true,
+      message: "Logged Out",
+    });
+  } catch (error) {
+    res.status(400).json({
       success: false,
       message: error.message,
     });
