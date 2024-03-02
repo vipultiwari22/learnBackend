@@ -1,4 +1,6 @@
+require("dotenv").config();
 const User = require("../models/user.model");
+const jwt = require("jsonwebtoken");
 const veryfySignupBody = async (req, res, next) => {
   try {
     if (!req.body.name) {
@@ -41,7 +43,46 @@ const veryfySignupBody = async (req, res, next) => {
     });
   }
 };
+const isLoggedIn = async (req, res, next) => {
+  try {
+    //  check if the token is present in to header
+    const token = req.headers["x-access-token"];
 
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "No token Found!",
+      });
+    }
+
+    // if it is the valid token
+
+    jwt.verify(token, process.env.MY_SECRET, async (err, decoded) => {
+      if (err) {
+        return res.status(400).json({
+          success: false,
+          message: "Unauthorized token!",
+        });
+      }
+      const user = await User.findOne({ email: decoded.email });
+      if (!user) {
+        res.status(400).json({
+          success: false,
+          message: "User token does not exist!",
+        });
+      }
+      next();
+    });
+
+    //  Then move to the next step
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
 module.exports = {
   veryfySignupBody: veryfySignupBody,
+  isLoggedIn: isLoggedIn,
 };

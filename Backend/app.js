@@ -3,6 +3,7 @@ const express = require("express");
 const DbConnect = require("./config/db.js");
 const cors = require("cors");
 const router = require("./routes/auth.route.js");
+const categoryRouter = require("./routes/category.route.js");
 const app = express();
 
 app.use(express.json());
@@ -16,5 +17,6 @@ DbConnect();
 // });
 
 app.use("/api/v2/users", router);
+app.use("/api/v2/category", categoryRouter);
 
 module.exports = app;
