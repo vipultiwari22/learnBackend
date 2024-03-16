@@ -135,26 +135,33 @@ export const loginUser = async (req, res, next) => {
 };
 
 export const isUserLoggedIn = async (req, res, next) => {
-  const { name, userName, email, bio } = req.body;
   try {
-    const getDetails = await User.findOne({ name, email, bio, userName });
+    // Extract email from decoded JWT token
+    const { email } = req.user;
 
-    if (!getDetails) {
-      res.status(400).json({
+    // Find the user in the database based on the email
+    const userDetails = await User.findOne({ email });
+
+    // Check if user details are found
+    if (!userDetails) {
+      return res.status(404).json({
         success: false,
-        message: "User Details not found",
-      });
-
-      res.status(200).json({
-        success: true,
-        message: "User Details ",
-        getDetails,
+        message: "User details not found",
       });
     }
+
+    // User details found, send the details in the response
+    return res.status(200).json({
+      success: true,
+      message: "User details",
+      user: userDetails,
+    });
   } catch (error) {
-    res.status(500).json({
+    // Handle any errors
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Internal server error",
+      error: error.message,
     });
   }
 };
