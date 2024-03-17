@@ -15,6 +15,6 @@ router.get("/", (req, res) => {
 router.get("/getAllUser", GetAllUserData);
 router.post("/signup", CreateUser);
 router.post("/login", loginUser);
-router.get("/getUserDetails", isLoggedIn, isUserLoggedIn);
+router.get("/getUserDetails", isUserLoggedIn);
 
 export default router;

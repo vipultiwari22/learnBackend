@@ -2,6 +2,9 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookie from "cookie-parser";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const GetAllUserData = async (req, res, next) => {
   try {
@@ -110,7 +113,7 @@ export const loginUser = async (req, res, next) => {
     const token = jwt.sign(
       { _id: user._id, email: user.email },
       process.env.MY_SECRET,
-      { expiresIn: "2h" } // Token expires in 2 hours
+      { expiresIn: "1d" } // Token expires in 1 day
     );
     // set token into the cookie
     res.cookie("token", token, {
@@ -136,13 +139,22 @@ export const loginUser = async (req, res, next) => {
 
 export const isUserLoggedIn = async (req, res, next) => {
   try {
-    // Extract email from decoded JWT token
-    const { email } = req.user;
+    // Extract token from the Authorization header
+    const token = req.headers.authorization.split(" ")[1];
 
-    // Find the user in the database based on the email
-    const userDetails = await User.findOne({ email });
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. No token provided.",
+      });
+    }
 
-    // Check if user details are found
+    // Verify the token
+    const decoded = jwt.verify(token, process.env.MY_SECRET);
+
+    // Find the user in the database based on the decoded token data
+    const userDetails = await User.findOne({ email: decoded.email });
+
     if (!userDetails) {
       return res.status(404).json({
         success: false,
@@ -158,6 +170,18 @@ export const isUserLoggedIn = async (req, res, next) => {
     });
   } catch (error) {
     // Handle any errors
+    console.error("Error:", error);
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Invalid token.",
+      });
+    } else if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Token has expired.",
+      });
+    }
     return res.status(500).json({
       success: false,
       message: "Internal server error",

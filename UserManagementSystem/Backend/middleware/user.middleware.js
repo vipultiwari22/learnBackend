@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
+import dotenv from "dotenv";
 
-// Using cookie-parser middleware to parse cookies
+dotenv.config();
 
 const isLoggedIn = async (req, res, next) => {
   try {
@@ -9,9 +10,9 @@ const isLoggedIn = async (req, res, next) => {
     const token = req.cookies.token;
 
     if (!token) {
-      return res.status(400).json({
+      return res.status(401).json({
         success: false,
-        message: "No token found in cookies!",
+        message: "Unauthorized. No token found in cookies!",
       });
     }
 
@@ -22,6 +23,7 @@ const isLoggedIn = async (req, res, next) => {
     const user = await User.findOne({
       email: decoded.email,
     });
+
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -32,9 +34,25 @@ const isLoggedIn = async (req, res, next) => {
     // Attach the user object to the request for further processing
     req.user = user;
 
-    next(); // Move to the next middleware/route handler
+    // Move to the next middleware/route handler
+    next();
   } catch (error) {
-    // Handle any errors
+    // Handle token verification errors
+    console.error("Error verifying token:", error);
+
+    if (error.name === "JsonWebTokenError") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Invalid token.",
+      });
+    } else if (error.name === "TokenExpiredError") {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized. Token has expired.",
+      });
+    }
+
+    // For other errors, return a generic internal server error
     return res.status(500).json({
       success: false,
       message: "Internal server error!",
