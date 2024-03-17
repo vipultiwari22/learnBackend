@@ -5,7 +5,7 @@ import {
   isUserLoggedIn,
   loginUser,
 } from "../controllers/user.controller.js";
-import isLoggedIn from "../middleware/user.middleware.js";
+import AuthUser from "../middleware/user.middleware.js";
 
 const router = express.Router();
 
@@ -15,6 +15,6 @@ router.get("/", (req, res) => {
 router.get("/getAllUser", GetAllUserData);
 router.post("/signup", CreateUser);
 router.post("/login", loginUser);
-router.get("/getUserDetails", isUserLoggedIn);
+router.get("/getUserDetails",AuthUser, isUserLoggedIn);
 
 export default router;

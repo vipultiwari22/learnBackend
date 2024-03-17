@@ -77,6 +77,7 @@ export const CreateUser = async (req, res, next) => {
   }
 };
 
+// Function to handle user login
 export const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -115,7 +116,7 @@ export const loginUser = async (req, res, next) => {
       process.env.MY_SECRET,
       { expiresIn: "1d" } // Token expires in 1 day
     );
-    // set token into the cookie
+    // Set token into the cookie
     res.cookie("token", token, {
       httpOnly: true, // Ensures the cookie is only accessible via HTTP(S) requests
       maxAge: 2 * 60 * 60 * 1000, // Expires in 2 hours (in milliseconds)
@@ -137,55 +138,23 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
+// Function to verify user login status
 export const isUserLoggedIn = async (req, res, next) => {
   try {
-    // Extract token from the Authorization header
-    const token = req.headers.authorization.split(" ")[1];
+    // Access the user details from res.locals.user
+    const userDetails = res.locals.user;
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized. No token provided.",
-      });
-    }
-
-    // Verify the token
-    const decoded = jwt.verify(token, process.env.MY_SECRET);
-
-    // Find the user in the database based on the decoded token data
-    const userDetails = await User.findOne({ email: decoded.email });
-
-    if (!userDetails) {
-      return res.status(404).json({
-        success: false,
-        message: "User details not found",
-      });
-    }
-
-    // User details found, send the details in the response
-    return res.status(200).json({
+    // Send the user details in the response
+    res.status(200).json({
       success: true,
       message: "User details",
       user: userDetails,
     });
   } catch (error) {
-    // Handle any errors
     console.error("Error:", error);
-    if (error.name === "JsonWebTokenError") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized. Invalid token.",
-      });
-    } else if (error.name === "TokenExpiredError") {
-      return res.status(401).json({
-        success: false,
-        message: "Unauthorized. Token has expired.",
-      });
-    }
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: "Internal server error",
-      error: error.message,
+      message: "Internal server error.",
     });
   }
 };

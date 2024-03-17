@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const isLoggedIn = async (req, res, next) => {
+const AuthUser = async (req, res, next) => {
   try {
     // Check if the token is present in the cookie
     const token = req.cookies.token;
@@ -31,8 +31,8 @@ const isLoggedIn = async (req, res, next) => {
       });
     }
 
-    // Attach the user object to the request for further processing
-    req.user = user;
+    // Attach the user object to the response for further processing
+    res.locals.user = user;
 
     // Move to the next middleware/route handler
     next();
@@ -60,4 +60,4 @@ const isLoggedIn = async (req, res, next) => {
   }
 };
 
-export default isLoggedIn;
+export default AuthUser;
