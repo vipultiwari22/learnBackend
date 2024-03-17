@@ -11,7 +11,13 @@ const app = express(); // Use const instead of assigning to app directly
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://127.0.0.1:5500", // Allow requests from this origin
+    credentials: true, // Include credentials (cookies, authorization headers) in CORS requests
+  })
+);
+
 app.use(cookieParser());
 
 // app.use("/", (req, res) => {
