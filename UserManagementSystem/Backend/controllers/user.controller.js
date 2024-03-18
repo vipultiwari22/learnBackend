@@ -139,10 +139,21 @@ export const loginUser = async (req, res, next) => {
 };
 
 // Function to verify user login status
-export const isUserLoggedIn = async (req, res, next) => {
+// import User from "../models/user.model.js";
+export const getUserDetails = async (req, res) => {
   try {
-    // Access the user details from res.locals.user
-    const userDetails = res.locals.user;
+    const userEmail = req.headers["User-Email"];
+    console.log(userEmail); // Access user email from request headers
+
+    // Use the user email to fetch user details from the database or API
+    const userDetails = await User.findOne({ email: userEmail });
+
+    if (!userDetails) {
+      return res.status(404).json({
+        success: false,
+        message: "User details not found!",
+      });
+    }
 
     // Send the user details in the response
     res.status(200).json({
@@ -151,7 +162,7 @@ export const isUserLoggedIn = async (req, res, next) => {
       user: userDetails,
     });
   } catch (error) {
-    console.error("Error:", error);
+    console.error("Error fetching user details:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error.",

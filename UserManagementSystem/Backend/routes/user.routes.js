@@ -2,7 +2,7 @@ import express from "express";
 import {
   CreateUser,
   GetAllUserData,
-  isUserLoggedIn,
+  getUserDetails,
   loginUser,
 } from "../controllers/user.controller.js";
 import AuthUser from "../middleware/user.middleware.js";
@@ -15,6 +15,6 @@ router.get("/", (req, res) => {
 router.get("/getAllUser", GetAllUserData);
 router.post("/signup", CreateUser);
 router.post("/login", loginUser);
-router.get("/getUserDetails",AuthUser, isUserLoggedIn);
+router.get("/getUserDetails", getUserDetails);
 
 export default router;

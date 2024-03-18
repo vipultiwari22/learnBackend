@@ -8,7 +8,7 @@ const AuthUser = async (req, res, next) => {
   try {
     // Check if the token is present in the cookie
     const token = req.cookies.token;
-
+    console.log(token);
     if (!token) {
       return res.status(401).json({
         success: false,
@@ -22,6 +22,7 @@ const AuthUser = async (req, res, next) => {
     // Find the user based on decoded token data
     const user = await User.findOne({
       email: decoded.email,
+      _id: decoded._id,
     });
 
     if (!user) {
@@ -40,12 +41,12 @@ const AuthUser = async (req, res, next) => {
     // Handle token verification errors
     console.error("Error verifying token:", error);
 
-    if (error.name === "JsonWebTokenError") {
+    if (error instanceof jwt.JsonWebTokenError) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized. Invalid token.",
       });
-    } else if (error.name === "TokenExpiredError") {
+    } else if (error instanceof jwt.TokenExpiredError) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized. Token has expired.",
